@@ -41,11 +41,24 @@ class Point {
  **********************************************************/
 class Wallet {
   // implement Wallet!
-  constructor(money) {}
+  constructor(money = 0) {
+    this.money = money;
+    // if (!money) {
+    //  this.money = 0;
+    // } else {
+    //   this.money = money;
+    // }
 
-  credit(amount) {}
+    // this.money = money || 0;
+  }
 
-  debit(amount) {}
+  credit(amount) {
+    this.money += amount;
+  }
+
+  debit(amount) {
+    this.money -= amount;
+  }
 }
 
 /**********************************************************
@@ -60,6 +73,15 @@ class Wallet {
  * let person = new Person(name, x, y);
  **********************************************************/
 class Person {
+  constructor(name, x, y) {
+    this.name = name;
+    this.location = new Point(x, y);
+    this.wallet = new Wallet();
+  }
+  moveTo(point) {
+    this.location = point;
+  }
+
   // implement Person!
 }
 
@@ -78,7 +100,20 @@ class Person {
  *
  * new vendor = new Vendor(name, x, y);
  **********************************************************/
-class Vendor {
+class Vendor extends Person {
+  constructor(name, x, y, range = 5, price = 1) {
+    super(name, x, y);
+
+    this.range = range;
+    this.price = price;
+  }
+
+  sellTo(customer, numberOfIceCreams) {
+    this.moveTo(customer.location);
+    customer.wallet.debit(this.price * numberOfIceCreams);
+    this.wallet.credit(this.price * numberOfIceCreams);
+  }
+
   // implement Vendor!
 }
 
@@ -98,7 +133,30 @@ class Vendor {
  *
  * new customer = new Customer(name, x, y);
  **********************************************************/
-class Customer {
+class Customer extends Person {
+  constructor(name, x, y) {
+    super(name, x, y);
+
+    this.wallet = new Wallet(10);
+  }
+
+  _isInRange(vendor) {
+    return this.location.distanceTo(vendor.location) <= vendor.range;
+  }
+
+  _haveEnoughMoney(vendor, numberOfIceCreams) {
+    return this.wallet.money >= vendor.price * numberOfIceCreams;
+  }
+
+  requestIceCream(vendor, numberOfIceCreams) {
+    if (
+      this._isInRange(vendor) &&
+      this._haveEnoughMoney(vendor, numberOfIceCreams)
+    ) {
+      vendor.sellTo(this, numberOfIceCreams);
+    }
+  }
+
   // implement Customer!
 }
 
